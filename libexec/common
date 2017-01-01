@@ -202,7 +202,6 @@ rebar3_relflow_1() {
 
   status "Relflow step 1"
   __exec '
-    set -e
     source ~/.profile
     rebar3 as staging relflow -u "$REFSPEC"
   '
@@ -214,7 +213,6 @@ rebar3_relflow_2() {
 
   status "Relflow step 2"
   __remote '
-    set -e
     source ~/.profile
     cd $BUILD_AT
     VER=`echo $REFSPEC | cut -c2-`
