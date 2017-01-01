@@ -80,6 +80,7 @@ git_push() {
 
   for _host in $_hosts
   do
+    echo $GIT_PUSH
     local _background_job="git push $GIT_PUSH $_host $REFSPEC $SILENCE"
     __log "JOB: $_background_job"
     ( eval "$_background_job" ) &
@@ -203,9 +204,13 @@ rebar3_relflow_1() {
   status "Relflow step 1"
   __exec '
     source ~/.profile
-    rebar3 as staging relflow -u "$REFSPEC"
+    rebar3 as staging relflow -u "$LASTVERSION"
   '
   __exec_if_defined "post_rebar3_relflow_1"
+}
+
+post_rebar3_relflow_1() {
+  REFSPEC=v`cat rebar.config | grep relflow-release-version-marker | cut -d'%' -f1 | sed s/\"//g | sed s/\ //g`
 }
 
 rebar3_relflow_2() {
@@ -217,10 +222,8 @@ rebar3_relflow_2() {
     cd $BUILD_AT
     VER=`echo $REFSPEC | cut -c2-`
     rebar3 as staging release relup tar -u "$VER"
-    NEWVER=`cat rebar.config | grep relflow-release-version-marker | cut -d'%' -f1 | sed s/\"//g | sed s/\ //g`
-    mkdir -p $DELIVER_TO/$NEWVER
-    cp "_build/staging/rel/$APP/$APP-$NEWVER.tar.gz" $DELIVER_TO/$NEWVER/$APP.tar.gz
-    exit 0
+    mkdir -p $DELIVER_TO/$VER
+    cp "_build/staging/rel/$APP/$APP-$VER.tar.gz" $DELIVER_TO/$VER/$APP.tar.gz
   '
   __exec_if_defined "post_rebar3_relflow_2"
 }
