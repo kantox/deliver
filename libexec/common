@@ -198,72 +198,69 @@ npm_install() {
   __exec_if_defined "post_npm_install"
 }
 
-pre_rebar3_initial_release() {
-  REFSPEC=`cat rebar.config | grep relflow-release-version-marker | cut -d'%' -f1 | sed s/\"//g | sed s/\ //g`
-}
-
 rebar3_initial_release() {
   __exec_if_defined "pre_rebar3_initial_release"
   status "Rebar3 initial release"
   __remote '
     export APP_NAME='"'$APP_NAME'"'
     export DELIVER_TO='"'$DELIVER_TO'"'
-    export REFSPEC='"'$REFSPEC'"'
+    export VER='"'$VER'"'
+    export REFSPEC=v"$VER"
+    echo $REFSPEC
     export DEPLOY_TO='"'$DEPLOY_TO'"'
-    export REFSPEC='"'$REFSPEC'"'
     export GROUP='"'$GROUP'"'
     source ~/.bashrc
     cd   $DELIVER_TO
-    echo "Version $REFSPEC"
     rebar3 as staging release tar
-    cp "_build/staging/rel/$APP_NAME/$APP_NAME-$REFSPEC.tar.gz" $DEPLOY_TO
+    cp "_build/staging/rel/$APP_NAME/$APP_NAME-$VER.tar.gz" $DEPLOY_TO
     cd $DEPLOY_TO
-    tar xfv "$APP_NAME-$REFSPEC.tar.gz"
+    tar xfv "$APP_NAME-$VER.tar.gz"
     bin/$APP_NAME start
   '
   __exec_if_defined "post_rebar3_initial_release"
 }
 
-rebar3_relflow_1() {
-  __exec_if_defined "pre_rebar3_relflow_1"
+relflow_1() {
+  __exec_if_defined "pre_relflow_1"
 
   status "Relflow step 1"
   __exec '
     source ~/.bashrc
-    rebar3 as staging relflow -u v"$LASTVERSION"
+    #rebar3 as staging relflow -u v"$LASTVERSION"
   '
-  __exec_if_defined "post_rebar3_relflow_1"
+  __exec_if_defined "post_relflow_1"
 }
 
-post_rebar3_relflow_1() {
+post_relflow_1() {
   VER=`cat rebar.config | grep relflow-release-version-marker | cut -d'%' -f1 | sed s/\"//g | sed s/\ //g`
   TAG=v"$VER"
   REFSPEC=$TAG
 }
 
-pre_rebar3_relflow_2() {
+pre_relflow_2() {
   VER=`cat rebar.config | grep relflow-release-version-marker | cut -d'%' -f1 | sed s/\"//g | sed s/\ //g`
-  REFSPEC=`cat rebar.config | grep relflow-release-version-marker | cut -d'%' -f1 | sed s/\"//g | sed s/\ //g`
+  REFSPEC="$VER"
 }
 
-rebar3_relflow_2() {
-  __exec_if_defined "pre_rebar3_relflow_2"
+relflow_2() {
+  __exec_if_defined "pre_relflow_2"
 
   status "Relflow step 2"
   __remote '
     source ~/.bashrc
+    export VER='"'$VER'"'
     export APP_NAME='"'$APP_NAME'"'
     export DELIVER_TO='"'$DELIVER_TO'"'
     export REFSPEC='"'$REFSPEC'"'
     export DEPLOY_TO='"'$DEPLOY_TO'"'
     cd $DELIVER_TO
     rebar3 as staging release relup tar -u "$REFSPEC"
-    mkdir -p $DEPLOY_TO/releases/$VER
+    mkdir -p "$DEPLOY_TO/releases/$REFSPEC"
     cp "_build/staging/rel/$APP_NAME/$APP_NAME-$REFSPEC.tar.gz" "$DEPLOY_TO/releases/$REFSPEC/$APP_NAME.tar.gz"
     cd $DEPLOY_TO
     bin/$APP_NAME install $REFSPEC
   '
-  __exec_if_defined "post_rebar3_relflow_2"
+  __exec_if_defined "post_relflow_2"
 }
 
 foreman_export() {

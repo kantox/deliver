@@ -16,13 +16,12 @@ fi
 #
 
 run() {
-  rebar3_relflow_1
-  echo "REFSPEC $REFSPEC"
+  relflow_1
   authorize_hosts
   init_app_remotely
   git_push
   git_reset_remote
   authorize_remote_hosts
   git_submodules
-  rebar3_relflow_2
+  relflow_2
 }
