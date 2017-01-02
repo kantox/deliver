@@ -11,16 +11,17 @@ then
   SUPERVISOR="upstart"
 fi
 
-
 # This function must be present since deliver will call it directly
 # Everything inside it or around it is up to you
 #
+
 run() {
+  rebar3_relflow_1
   authorize_hosts
   init_app_remotely
   git_push
   git_reset_remote
   authorize_remote_hosts
   git_submodules
-  rebar3_initial_release
+  rebar3_relflow_2
 }
