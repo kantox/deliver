@@ -235,10 +235,15 @@ rebar3_relflow_1() {
   __exec_if_defined "post_rebar3_relflow_1"
 }
 
+post_rebar3_relflow_1() {
+  VER=`cat rebar.config | grep relflow-release-version-marker | cut -d'%' -f1 | sed s/\"//g | sed s/\ //g`
+  TAG=v"$VER"
+  REFSPEC=$TAG
+}
+
 pre_rebar3_relflow_2() {
   VER=`cat rebar.config | grep relflow-release-version-marker | cut -d'%' -f1 | sed s/\"//g | sed s/\ //g`
-  TAG=v"$TAG"
-  REFSPEC=$TAG
+  REFSPEC=`cat rebar.config | grep relflow-release-version-marker | cut -d'%' -f1 | sed s/\"//g | sed s/\ //g`
 }
 
 rebar3_relflow_2() {
@@ -247,19 +252,16 @@ rebar3_relflow_2() {
   status "Relflow step 2"
   __remote '
     source ~/.bashrc
-    export LASTVERSION='"'$LASTVERSION'"'
     export APP_NAME='"'$APP_NAME'"'
     export DELIVER_TO='"'$DELIVER_TO'"'
-    export TAG='"'$TAG'"'
     export REFSPEC='"'$REFSPEC'"'
-    export VER='"'$VER'"'
     export DEPLOY_TO='"'$DEPLOY_TO'"'
     cd $DELIVER_TO
-    rebar3 as staging release relup tar -u "$LASTVERSION"
+    rebar3 as staging release relup tar -u "$REFSPEC"
     mkdir -p $DEPLOY_TO/releases/$VER
-    cp "_build/staging/rel/$APP_NAME/$APP_NAME-$VER.tar.gz" $DEPLOY_TO/releases/$VER/$APP_NAME.tar.gz
+    cp "_build/staging/rel/$APP_NAME/$APP_NAME-$REFSPEC.tar.gz" "$DEPLOY_TO/releases/$REFSPEC/$APP_NAME.tar.gz"
     cd $DEPLOY_TO
-    bin/$APP_NAME install $VER
+    bin/$APP_NAME install $REFSPEC
   '
   __exec_if_defined "post_rebar3_relflow_2"
 }

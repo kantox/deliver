@@ -17,6 +17,7 @@ fi
 
 run() {
   rebar3_relflow_1
+  echo "REFSPEC $REFSPEC"
   authorize_hosts
   init_app_remotely
   git_push
