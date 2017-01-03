@@ -11,11 +11,11 @@ OPTIONAL_CONFIGS+=(SUPERVISOR)
 #
 
 run() {
-  generate_relapp
   authorize_hosts
   init_app_remotely
   git_push
   git_reset_remote
   authorize_remote_hosts
   git_submodules
+  generate_relapp
 }

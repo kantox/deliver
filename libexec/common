@@ -222,15 +222,16 @@ rebar3_release_tar() {
 }
 
 pre_generate_relapp() {
-  VER=`echo $REFSPEC | cut -d'v' -f2`
+  REFSPEC="$VER"
 }
 
 generate_relapp() {
   __exec_if_defined "pre_generate_relapp"
 
   status "Relflow generate relapp"
-  __exec '
+  __remote '
     source ~/.bashrc
+    export REFSPEC='"'$REFSPEC'"'
     rebar3 as staging relflow -u "$REFSPEC"
   '
   __exec_if_defined "post_generate_relapp"
