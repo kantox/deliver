@@ -3,25 +3,19 @@
 # This is the a deliver strategy based on rebar3 and relflow
 # It uses git push, rebar3 and relflow
 
-REQUIRED_CONFIGS+=(HOSTS)
+REQUIRED_CONFIGS+=(HOSTS REFSPEC)
 OPTIONAL_CONFIGS+=(SUPERVISOR)
-
-if [ -z "$SUPERVISOR" ]
-then
-  SUPERVISOR="upstart"
-fi
 
 # This function must be present since deliver will call it directly
 # Everything inside it or around it is up to you
 #
 
 run() {
-  relflow_1
+  generate_relapp
   authorize_hosts
   init_app_remotely
   git_push
   git_reset_remote
   authorize_remote_hosts
   git_submodules
-  relflow_2
 }
