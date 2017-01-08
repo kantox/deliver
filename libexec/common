@@ -242,14 +242,15 @@ generate_relapp() {
     export DELIVER_TO='"'$DELIVER_TO'"'
     export DEPLOY_TO='"'$DEPLOY_TO'"'
     export VER='"'$VER'"'
+    export ERLANG_ENV='"'$ERLANG_ENV'"'
     cd $DELIVER_TO
     git checkout master
-    rebar3 as staging relflow -u "v$VER"
-    rebar3 as staging release relup -u "$VER"
-    rebar3 as staging release tar
+    rebar3 as "$ERLANG_ENV" relflow -u "v$VER"
+    rebar3 as "$ERLANG_ENV" release relup -u "$VER"
+    rebar3 as "$ERLANG_ENV" release tar
     NEWVER=`cat rebar.config | grep relflow-release-version-marker | cut -d'%' -f1 | sed s/\"//g | sed s/\ //g`
     mkdir -p "$DEPLOY_TO/releases/$NEWVER"
-    cp "_build/staging/rel/redis_for_rates/redis_for_rates-$NEWVER.tar.gz" "$DEPLOY_TO/releases/$NEWVER"/redis_for_rates.tar.gz
+    cp "_build/$ERLANG_ENV/rel/redis_for_rates/redis_for_rates-$NEWVER.tar.gz" "$DEPLOY_TO/releases/$NEWVER"/redis_for_rates.tar.gz
   '
   __exec_if_defined "post_generate_relapp"
 }
