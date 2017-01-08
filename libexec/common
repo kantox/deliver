@@ -198,6 +198,13 @@ npm_install() {
   __exec_if_defined "post_npm_install"
 }
 
+relflow_versions_init(){
+  git tag | xargs git tag -d
+  rebar3 relflow init-versions
+  git commit -a -m "relflow versions init"
+  export VER=`cat rebar.config | grep relflow-release-version-marker | cut -d'%' -f1 | sed s/\"//g | sed s/\ //g`
+  git tag -a "v$VER" -m "v$VER"
+}
 pre_rebar3_release_tar() {
   VER=`cat rebar.config | grep relflow-release-version-marker | cut -d'%' -f1 | sed s/\"//g | sed s/\ //g`
 }
@@ -222,7 +229,7 @@ rebar3_release_tar() {
 }
 
 pre_generate_relapp() {
-  REFSPEC="$VER"
+  export VER=`cat rebar.config | grep relflow-release-version-marker | cut -d'%' -f1 | sed s/\"//g | sed s/\ //g`
 }
 
 generate_relapp() {
@@ -231,8 +238,18 @@ generate_relapp() {
   status "Relflow generate relapp"
   __remote '
     source ~/.bashrc
-    export REFSPEC='"'$REFSPEC'"'
-    rebar3 as staging relflow -u "$REFSPEC"
+    export APP_NAME='"'$APP_NAME'"'
+    export DELIVER_TO='"'$DELIVER_TO'"'
+    export DEPLOY_TO='"'$DEPLOY_TO'"'
+    export VER='"'$VER'"'
+    cd $DELIVER_TO
+    git checkout master
+    rebar3 as staging relflow -u "v$VER"
+    rebar3 as staging release relup -u "$VER"
+    rebar3 as staging release tar
+    NEWVER=`cat rebar.config | grep relflow-release-version-marker | cut -d'%' -f1 | sed s/\"//g | sed s/\ //g`
+    mkdir -p "$DEPLOY_TO/releases/$NEWVER"
+    cp "_build/staging/rel/redis_for_rates/redis_for_rates-$NEWVER.tar.gz" "$DEPLOY_TO/releases/$NEWVER"/redis_for_rates.tar.gz
   '
   __exec_if_defined "post_generate_relapp"
 }
@@ -242,11 +259,8 @@ post_generate_relapp() {
   REFSPEC=v"$VER"
 }
 
-pre_generate_relup() {
-  VER=`cat rebar.config | grep relflow-release-version-marker | cut -d'%' -f1 | sed s/\"//g | sed s/\ //g`
-  REFSPEC=v"$VER"
-}
-
+# rebar3 as staging release relup -u 20170107.122137 where 20170107.122137 is the deployed version
+# REFSPEC=20170107.122137 rebar3 as staging release relup -u $REFSPEC
 generate_relup() {
   __exec_if_defined "pre_generate_relup"
 
@@ -258,7 +272,8 @@ generate_relup() {
     export DEPLOY_TO='"'$DEPLOY_TO'"'
     export VER='"'$VER'"'
     cd $DELIVER_TO
-    rebar3 as staging release relup tar -u "$VER"
+    rebar3 as staging relup -u "$VER"
+    rebar3 as staging release tar
     mkdir -p "$DEPLOY_TO/releases/$VER"
     cp "_build/staging/rel/$APP_NAME/$APP_NAME-$VER.tar.gz" "$DEPLOY_TO/releases/$VER/$APP_NAME.tar.gz"
     cd $DEPLOY_TO

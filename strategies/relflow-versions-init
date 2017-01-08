@@ -3,13 +3,10 @@
 # This is the a deliver strategy based on rebar3 and relflow
 # It uses git push, rebar3 and relflow
 
-REQUIRED_CONFIGS+=(HOSTS)
-OPTIONAL_CONFIGS+=(SUPERVISOR)
-
 # This function must be present since deliver will call it directly
 # Everything inside it or around it is up to you
 #
 
 run() {
-  generate_relup
+  relflow_versions_init
 }
