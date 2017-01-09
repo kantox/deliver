@@ -218,10 +218,11 @@ rebar3_release_tar() {
     export VER='"'$VER'"'
     export DEPLOY_TO='"'$DEPLOY_TO'"'
     export GROUP='"'$GROUP'"'
+    export ERLANG_ENV='"'$ERLANG_ENV'"'
     source ~/.bashrc
     cd   $DELIVER_TO
-    rebar3 as staging release tar
-    cp "_build/staging/rel/$APP_NAME/$APP_NAME-$VER.tar.gz" $DEPLOY_TO
+    rebar3 as $ERLANG_ENV release tar
+    cp "_build/$ERLANG_ENV/rel/$APP_NAME/$APP_NAME-$VER.tar.gz" $DEPLOY_TO
     cd $DEPLOY_TO
     tar xfv "$APP_NAME-$VER.tar.gz"
   '
@@ -237,17 +238,22 @@ generate_relapp() {
 
   status "Relflow generate relapp"
   __remote '
-    source ~/.bashrc
     export APP_NAME='"'$APP_NAME'"'
     export DELIVER_TO='"'$DELIVER_TO'"'
-    export DEPLOY_TO='"'$DEPLOY_TO'"'
     export VER='"'$VER'"'
+    export DEPLOY_TO='"'$DEPLOY_TO'"'
+    export GROUP='"'$GROUP'"'
     export ERLANG_ENV='"'$ERLANG_ENV'"'
+    export GIT_EMAIL='"'$GIT_EMAIL'"'
+    export GIT_USER='"'$GIT_USER'"'
+    source ~/.bashrc
     cd $DELIVER_TO
+    git config user.email $GIT_EMAIL
+    git config user.name $GIT_USER
     git checkout master
-    rebar3 as "$ERLANG_ENV" relflow -u "v$VER"
-    rebar3 as "$ERLANG_ENV" release relup -u "$VER"
-    rebar3 as "$ERLANG_ENV" release tar
+    rebar3 as $ERLANG_ENV relflow -u "v$VER"
+    rebar3 as $ERLANG_ENV release relup -u $VER
+    rebar3 as $ERLANG_ENV release tar
     NEWVER=`cat rebar.config | grep relflow-release-version-marker | cut -d'%' -f1 | sed s/\"//g | sed s/\ //g`
     mkdir -p "$DEPLOY_TO/releases/$NEWVER"
     cp "_build/$ERLANG_ENV/rel/redis_for_rates/redis_for_rates-$NEWVER.tar.gz" "$DEPLOY_TO/releases/$NEWVER"/redis_for_rates.tar.gz
