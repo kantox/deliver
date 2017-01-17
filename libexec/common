@@ -198,13 +198,6 @@ npm_install() {
   __exec_if_defined "post_npm_install"
 }
 
-relflow_versions_init(){
-  git tag | xargs git tag -d
-  rebar3 relflow init-versions
-  git commit -a -m "relflow versions init"
-  export VER=`cat rebar.config | grep relflow-release-version-marker | cut -d'%' -f1 | sed s/\"//g | sed s/\ //g`
-  git tag -a "v$VER" -m "v$VER"
-}
 pre_rebar3_release_tar() {
   VER=`cat rebar.config | grep relflow-release-version-marker | cut -d'%' -f1 | sed s/\"//g | sed s/\ //g`
 }
@@ -221,6 +214,7 @@ rebar3_release_tar() {
     export ERLANG_ENV='"'$ERLANG_ENV'"'
     source ~/.bashrc
     cd   $DELIVER_TO
+    git checkout $REFSPEC
     rebar3 as $ERLANG_ENV release tar
     cp "_build/$ERLANG_ENV/rel/$APP_NAME/$APP_NAME-$VER.tar.gz" $DEPLOY_TO
     cd $DEPLOY_TO
@@ -256,7 +250,7 @@ generate_relapp() {
     rebar3 as $ERLANG_ENV release tar
     NEWVER=`cat rebar.config | grep relflow-release-version-marker | cut -d'%' -f1 | sed s/\"//g | sed s/\ //g`
     mkdir -p "$DEPLOY_TO/releases/$NEWVER"
-    cp "_build/$ERLANG_ENV/rel/redis_for_rates/redis_for_rates-$NEWVER.tar.gz" "$DEPLOY_TO/releases/$NEWVER"/redis_for_rates.tar.gz
+    cp "_build/$ERLANG_ENV/rel/$APP_NAME/$APP_NAME-$NEWVER.tar.gz" "$DEPLOY_TO/releases/$NEWVER"/$APP_NAME.tar.gz
   '
   __exec_if_defined "post_generate_relapp"
 }
