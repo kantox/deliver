@@ -272,6 +272,8 @@ generate_relup() {
     export DELIVER_TO='"'$DELIVER_TO'"'
     export DEPLOY_TO='"'$DEPLOY_TO'"'
     export VER='"'$VER'"'
+    export GIT_EMAIL='"'$GIT_EMAIL'"'
+    export GIT_USER='"'$GIT_USER'"'
     cd $DELIVER_TO
     rebar3 as staging relup -u "$VER"
     rebar3 as staging release tar

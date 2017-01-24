@@ -250,7 +250,7 @@ __remote() {
   do
     ssh -A -o ConnectTimeout="$SSH_TIMEOUT" "$_host" "$_remote_job $SILENCE" &
     background_jobs_pids+=("$!")
-    local _background_job="ssh -o ConnectTimeout=$SSH_TIMEOUT $_host $_remote_job $SILENCE"
+    local _background_job="ssh -A -o ConnectTimeout=$SSH_TIMEOUT $_host $_remote_job $SILENCE"
     background_jobs+=("$_background_job")
   done
 
