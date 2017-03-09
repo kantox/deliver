@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+# This is the a deliver strategy based on rebar3
+# It uses git push and rebar3
+
+REQUIRED_CONFIGS+=(HOSTS REFSPEC)
+OPTIONAL_CONFIGS+=(SUPERVISOR)
+
+# This function must be present since deliver will call it directly
+# Everything inside it or around it is up to you
+
+run() {
+  authorize_hosts
+  init_app_remotely
+  git_push
+  git_reset_remote
+  authorize_remote_hosts
+  git_submodules
+  generate_rebar_relapp
+}

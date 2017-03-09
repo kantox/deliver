@@ -260,6 +260,30 @@ post_generate_relapp() {
   REFSPEC=v"$VER"
 }
 
+generate_rebar_relapp() {
+  status "Generate relapp"
+  __remote '
+    export APP_NAME='"'$APP_NAME'"'
+    export DELIVER_TO='"'$DELIVER_TO'"'
+    export VER='"'$VER'"'
+    export DEPLOY_TO='"'$DEPLOY_TO'"'
+    export GROUP='"'$GROUP'"'
+    export ERLANG_ENV='"'$ERLANG_ENV'"'
+    export GIT_EMAIL='"'$GIT_EMAIL'"'
+    export GIT_USER='"'$GIT_USER'"'
+    source ~/.bashrc
+    cd $DELIVER_TO
+    git config user.email $GIT_EMAIL
+    git config user.name $GIT_USER
+    git checkout master
+    make prod
+    mkdir -p "$DEPLOY_TO/releases/$VER"
+    cp "_build/$ERLANG_ENV/rel/$APP_NAME/$APP_NAME-$VER.tar.gz" "$DEPLOY_TO/releases/$VER/$APP_NAME.tar.gz"
+    tar -xf "$DEPLOY_TO/releases/$VER/$APP_NAME.tar.gz" -C "$DEPLOY_TO/releases/$VER/"
+    ln -sf "$DEPLOY_TO/releases/$VER/" "$DEPLOY_TO/current"
+  '
+}
+
 # rebar3 as staging release relup -u 20170107.122137 where 20170107.122137 is the deployed version
 # REFSPEC=20170107.122137 rebar3 as staging release relup -u $REFSPEC
 generate_relup() {
