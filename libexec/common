@@ -276,7 +276,7 @@ generate_rebar_relapp() {
     git config user.email $GIT_EMAIL
     git config user.name $GIT_USER
     git checkout master
-    make prod
+    rebar3 as $ERLANG_ENV release tar
     mkdir -p "$DEPLOY_TO/releases/$VER"
     cp "_build/$ERLANG_ENV/rel/$APP_NAME/$APP_NAME-$VER.tar.gz" "$DEPLOY_TO/releases/$VER/$APP_NAME.tar.gz"
     tar -xf "$DEPLOY_TO/releases/$VER/$APP_NAME.tar.gz" -C "$DEPLOY_TO/releases/$VER/"
