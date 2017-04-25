@@ -206,6 +206,7 @@ rebar3_release_tar() {
   __exec_if_defined "pre_rebar3_release_tar"
   status "Rebar3 create release tar"
   __remote '
+    export REFSPEC='"'$REFSPEC'"'
     export APP_NAME='"'$APP_NAME'"'
     export DELIVER_TO='"'$DELIVER_TO'"'
     export VER='"'$VER'"'
@@ -221,9 +222,10 @@ rebar3_release_tar() {
     git checkout $REFSPEC
     git remote add origin $GIT_REMOTE
     rebar3 as $ERLANG_ENV release tar
-    cp "_build/$ERLANG_ENV/rel/$APP_NAME/$APP_NAME-$VER.tar.gz" $DEPLOY_TO
+    mkdir -p "$DEPLOY_TO/releases/$VER"
+    cp "_build/$ERLANG_ENV/rel/$APP_NAME/$APP_NAME-$VER.tar.gz" "$DEPLOY_TO/releases/$VER/$APP_NAME.tar.gz"
     cd $DEPLOY_TO
-    tar xfv "$APP_NAME-$VER.tar.gz"
+    tar xfv "releases/$VER/$APP_NAME.tar.gz"
   '
   __exec_if_defined "post_rebar3_initial_release"
 }
@@ -256,8 +258,8 @@ generate_relapp() {
     rebar3 as $ERLANG_ENV release relup -u $VER
     rebar3 as $ERLANG_ENV release tar
     NEWVER=`cat rebar.config | grep relflow-release-version-marker | cut -d'%' -f1 | sed s/\"//g | sed s/\ //g`
-    mkdir -p "$DEPLOY_TO/releases/$NEWVER"
-    cp "_build/$ERLANG_ENV/rel/$APP_NAME/$APP_NAME-$NEWVER.tar.gz" "$DEPLOY_TO/releases/$NEWVER"/$APP_NAME.tar.gz
+    mkdir -p "$DEPLOY_TO/release/$APP_NAME/$NEWVER"
+    cp "_build/$ERLANG_ENV/rel/$APP_NAME/$APP_NAME-$NEWVER.tar.gz" "$DEPLOY_TO/release/$APP_NAME/$NEWVER"/$APP_NAME.tar.gz
   '
   __exec_if_defined "post_generate_relapp"
 }
