@@ -212,9 +212,14 @@ rebar3_release_tar() {
     export DEPLOY_TO='"'$DEPLOY_TO'"'
     export GROUP='"'$GROUP'"'
     export ERLANG_ENV='"'$ERLANG_ENV'"'
+    export GIT_EMAIL='"'$GIT_EMAIL'"'
+    export GIT_USER='"'$GIT_USER'"'
+    export GIT_REMOTE='"'$GIT_REMOTE'"'
+    git config --global push.default simple
     source ~/.bashrc
     cd   $DELIVER_TO
     git checkout $REFSPEC
+    git remote add origin $GIT_REMOTE
     rebar3 as $ERLANG_ENV release tar
     cp "_build/$ERLANG_ENV/rel/$APP_NAME/$APP_NAME-$VER.tar.gz" $DEPLOY_TO
     cd $DEPLOY_TO
@@ -225,6 +230,7 @@ rebar3_release_tar() {
 
 pre_generate_relapp() {
   export VER=`cat rebar.config | grep relflow-release-version-marker | cut -d'%' -f1 | sed s/\"//g | sed s/\ //g`
+  export GIT_REMOTE=`git remote get-url origin`
 }
 
 generate_relapp() {
@@ -240,10 +246,11 @@ generate_relapp() {
     export ERLANG_ENV='"'$ERLANG_ENV'"'
     export GIT_EMAIL='"'$GIT_EMAIL'"'
     export GIT_USER='"'$GIT_USER'"'
+    export GIT_REMOTE='"'$GIT_REMOTE'"'
     source ~/.bashrc
     cd $DELIVER_TO
     git config user.email $GIT_EMAIL
-    git config user.name $GIT_USER
+    git config user.name  $GIT_USER
     git checkout master
     rebar3 as $ERLANG_ENV relflow -u "v$VER"
     rebar3 as $ERLANG_ENV release relup -u $VER
