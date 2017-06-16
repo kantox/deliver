@@ -289,7 +289,8 @@ generate_rebar_relapp() {
     mkdir -p "$DEPLOY_TO/releases/$VER"
     cp "_build/$ERLANG_ENV/rel/$APP_NAME/$APP_NAME-$VER.tar.gz" "$DEPLOY_TO/releases/$VER/$APP_NAME.tar.gz"
     tar -xf "$DEPLOY_TO/releases/$VER/$APP_NAME.tar.gz" -C "$DEPLOY_TO/releases/$VER/"
-    ln -sf "$DEPLOY_TO/releases/$VER/" "$DEPLOY_TO/current"
+    rm "$DEPLOY_TO/current"
+    ln -s "$DEPLOY_TO/releases/$VER/" "$DEPLOY_TO/current"
   '
 }
 
